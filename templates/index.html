@@ -531,10 +531,12 @@ void main() {
 	var positions = {x:[], y:[]};		// for auto zoom
 	var mustRenderNextFrame = false;
 
+	// seen
 	function ushortWithFlag(x, flag) {
 		return (x|0)*2 + (flag ? 1 : 0)
 	}
 
+	// seen
 	function roundUpToPowerOfTwo(x) {
 			//return Math.pow(2, Math.floor(Math.log(x, 2)) + 1);
 			x--;
@@ -544,6 +546,7 @@ void main() {
 			return ++x;
 	}
 
+	// seen
 	function resizeImageToPowerOfTwo(image) {
 		var width = roundUpToPowerOfTwo(image.width);
 		var height = roundUpToPowerOfTwo(image.height);
@@ -560,6 +563,7 @@ void main() {
 		return cv;
 	}
 
+	// seen
 	function imageTextureReady(handle, image) {
 		gl.bindTexture(gl.TEXTURE_2D, handle);
 		gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
@@ -577,6 +581,7 @@ void main() {
 		forceAnimationChange();
 	}
 
+	// seen
 	function getImageTexture(filename) {
 		var handle = imageTextures[filename];
 		if (!handle) {
@@ -610,6 +615,7 @@ void main() {
 	var lastAnimationTimestamp;
 	var animationDuration = 60;
 
+	// seen
 	function mix(b, a, t) {
 		if (t < 0) t = 0;
 		else if (t > 1) t = 1;
@@ -617,11 +623,13 @@ void main() {
 		return a * t + b * (1 - t);
 	}
 	
+	// seen
 	function log(s) {
 		console.log(s);
 		document.getElementById("loadinginfo").textContent += s + "\n";
 	}
 
+	// seen
 	function approxEqual(a, b) {
 		return Math.abs(a - b) < 0.00000001;
 
@@ -637,6 +645,7 @@ void main() {
 		*/
 	}
 
+	// seen
 	function getAnimatedValue(value, target, elapsed) {
 		if (isNaN(value)) return target;
 		
@@ -648,6 +657,7 @@ void main() {
 		return newval;
 	}
 	
+	// seen
 	function updateAnimations(timestamp) {
 		var elapsed = lastAnimationTimestamp ? timestamp - lastAnimationTimestamp : 0;
 		
@@ -670,6 +680,7 @@ void main() {
 		return changed;
 	}
 
+	// seen
 	function finishAnimations() {
 		for (var key in animTransform) {
 			animTransform[key] = transform[key];
@@ -677,10 +688,12 @@ void main() {
 		forceAnimationChange();
 	}
 
+	// seen
 	function forceAnimationChange() {
 		mustRenderNextFrame = true;
 	}
 	
+	// seen
 	function initGl() {
 		// need alpha: false so what's behind the webgl canvas doesn't bleed through
 		// see http://www.zovirl.com/2012/08/24/webgl_alpha/
@@ -719,6 +732,7 @@ void main() {
 	}
 
 
+	// seen
 	function compileShaderFromElement(id, defines) {
 		var elem = document.getElementById(id);
 		if (!elem) {
@@ -751,6 +765,7 @@ void main() {
 		return shader;
 	}
 
+	// seen
     function createProgram(vid, fid, defines) {
     	var vshader = compileShaderFromElement(vid, defines);
 		var fshader = compileShaderFromElement(fid, defines);
@@ -789,6 +804,7 @@ void main() {
 		return program;
     }
 
+	// seen
 	function processPageData() {
 		pageData = JSON.parse(this.responseText);
 		log("Loaded " + pageData.length + " page(s)")
@@ -819,6 +835,7 @@ void main() {
 		gl.bufferData(gl.ARRAY_BUFFER, pageVerts, gl.STATIC_DRAW);
 	}
 
+	// seen
 	function requestFile(filename, cb, rtype) {
         var req = new XMLHttpRequest();
         req.open("GET", uncached(`static/` + filename), true);
@@ -829,24 +846,32 @@ void main() {
         req.send(null);
 	}
 	
+	// seen
 	function enableAttributes(prog) {
 		for (var a in prog.attributes) {
 			gl.enableVertexAttribArray(prog.attributes[a])
 		}
 	}
 
+	// seen
 	function disableAttributes(prog) {
 		for (var a in prog.attributes) {
 			gl.disableVertexAttribArray(prog.attributes[a]);
 		}
 	}
 
+	// ?
 	function unpackBmp(buf) {
 		// TODO: endian issues
-		var iarr = new Uint16Array(buf, 18, 4);
-		return {buf: buf.slice(54), width: iarr[0], height: iarr[2]};
+		var iarr = new Uint16Array(buf, 18, 4); // Почему 18 и 4?
+		return {
+			buf: buf.slice(54),  // Почему 54?
+			width: iarr[0],  // Что за iarr[0], width?
+			height: iarr[2] // Что за iarr[2], height?
+		}; 
 	}
 	
+	// ?
 	function processAtlas() {
 		var data = unpackBmp(this.response);
 		var arrayView = new Uint8Array(data.buf);
@@ -869,6 +894,7 @@ void main() {
 		requestFile('atlasverts.bmp', processAtlasVertices, 'arraybuffer');
 	}
 
+	// seen
 	function transposeBytes(buf, innerDim) {
 		var inputArray = new Uint8Array(buf);
 		var outputArray = new Uint8Array(inputArray.length);
@@ -884,10 +910,12 @@ void main() {
 		return outputArray.buffer;
 	}
 
+	// seen
 	function boxesIntersect(a, b) {
 		return a.x0 < b.x1 && a.y0 < b.y1 && a.x1 > b.x0 && a.y1 > b.y0;
 	}
 
+	// ?
 	function processGlyphs() {
 		var data = unpackBmp(this.response);
 		var uposition = new  Int16Array(data.buf, 0);
@@ -961,6 +989,7 @@ void main() {
 	}
 
 
+	// ?
 	function doGlyphVertexAttribPointers(prog) {
 		var stride = int16PerVertex*2;
 		gl.vertexAttribPointer(prog.attributes.aPosition, 			2, gl.SHORT,   		  true,  stride,  0);
@@ -968,6 +997,7 @@ void main() {
 		gl.vertexAttribPointer(prog.attributes.aColor,     			4, gl.UNSIGNED_BYTE,  true,  stride,  4*2);
 	}
 
+	// ?
 	function processAtlasVertices() {
 		var data = unpackBmp(this.response);
 		var handle = gl.createBuffer();
@@ -1043,6 +1073,7 @@ void main() {
 	}
 
 
+	// seen
 	function processImageVertices() {
 		var buf = unpackBmp(this.response).buf;
 		imageBuffer = gl.createBuffer();
@@ -1052,6 +1083,7 @@ void main() {
 		console.log("Loaded image vertex buffer: " + buf.byteLength + " bytes, this is " + buf.byteLength / 10 / 6 + " images");
 	}
 	
+	// seen
 	function setCanvasSize() {
 		var devicePixelRatio = window.devicePixelRatio || 1;
 		if (window.innerWidth && window.outerWidth) {
@@ -1068,6 +1100,7 @@ void main() {
 		}		
 	}
 
+	// seen
 	function setPageUniforms(program, page, zoomx, zoomy) {
 		// Shader would have done:
 		//pos = (pos - uTranslate) / uZoom;
@@ -1099,6 +1132,7 @@ void main() {
 		return true;
 	}
 	
+	// seen
 	function computePageLocations() {
 		var cols = Math.floor(Math.sqrt(pageData.length / canvas.height * canvas.width / pageData[0].width * pageData[0].height));
 
@@ -1114,10 +1148,12 @@ void main() {
 
 	}
 
+	// seen
 	function lerp(from, to, t) {
 		return (to - from) * t + from;
 	}
 	
+	// seen
 	function doubleExponentialSigmoid(x, a) {
 		var epsilon = 0.00001;
 		var min_param_a = 0.0 + epsilon;
@@ -1134,6 +1170,7 @@ void main() {
 		return y;
 	}
 	
+	// seen
 	function blend(from, to, t, a) {
 		if (a == null) a = 0.9;
 		return lerp(from, to, doubleExponentialSigmoid(t, a));
@@ -1313,6 +1350,7 @@ void main() {
 		drawScene(timestamp);
 	}
 	
+	// seen
 	function canvasMouseEnter(e) {
 		this.lastX = e.clientX;
 		this.lastY = e.clientY;
@@ -1320,6 +1358,7 @@ void main() {
 	
 		
 	var prevPinchDiff = -1;
+	// seen
 	function canvasTouchStart(e) {
 		var touch = e.targetTouches[0];
 		this.lastX = touch.clientX;
@@ -1328,6 +1367,7 @@ void main() {
 		prevPinchDiff = -1;
 	}
 
+	// seen
 	function handlePinch(ev) {
 		var touches = ev.targetTouches;
 
@@ -1345,6 +1385,7 @@ void main() {
 		}
 	}
 
+	// seen
 	function canvasTouchMove(e) {
 		var touch = e.targetTouches[0];
 
@@ -1371,6 +1412,7 @@ void main() {
 		e.preventDefault();
 	}
 
+	// seen
 	function canvasMouseMove(e) {
 		var btn = e.buttons;
 		if (btn == null) {
@@ -1401,6 +1443,7 @@ void main() {
 		this.lastY = e.clientY;
 	}
 	
+	// seen
 	function changeZoom(amount, e) {
 		var x=0, y=0;
 		if (e && e.clientX != null) {
@@ -1429,6 +1472,7 @@ void main() {
 		transform.y = worldy - y * zoomy;
 	}
 
+	// seen
 	function canvasMouseWheel(e) {
 		var amt = e.deltaY;
 		if (e.deltaMode == 1) amt *= 30;
@@ -1439,6 +1483,7 @@ void main() {
 	}
 	
 
+	// seen
 	function fullscreen() {
 		var e = document.getElementById("canvaswrap")
 		if (e.requestFullscreen) {
@@ -1454,6 +1499,7 @@ void main() {
 		forceAnimationChange();
 	}
 	
+	// seen
 	function uncached(s) {
 		if (document.location.hostname == "localhost") {
 			return s + "?" + Math.random();
@@ -1461,6 +1507,7 @@ void main() {
 		return s;
 	}
 
+	// ?
 	function webGlStart() {
 		
 		canvas = document.getElementById("beziercanvas");
@@ -1490,6 +1537,7 @@ void main() {
 		initGl();
 
 		// Shader programs
+		// ?
 		log("Compiling shaders...");
     	imageProgram = createProgram("imagevs", "imagefs");
     	glyphProgram = createProgram("glyphvs", "glyphfs", "#define kUseRasteredAtlas\n");
@@ -1507,6 +1555,7 @@ void main() {
 
 	}
 
+	// seen
 	function go() {
 		if (window.navigator.userAgent.indexOf("Trident") >= 0 || window.navigator.userAgent.indexOf("Edge") >= 0) {
 			log("The shader is currently very, very, very, very slow to compile on Microsoft browsers. Hold tight..");
